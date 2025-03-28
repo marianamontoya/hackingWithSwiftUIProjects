@@ -108,6 +108,8 @@ struct ContentView: View {
     @State private var currentFilter = CIFilter.pixellate()
     let context = CIContext()
     
+    @State private var showingFilters = false
+    
     var body: some View {
         NavigationStack {
             VStack{
@@ -142,10 +144,13 @@ struct ContentView: View {
             }
             .padding([.horizontal, .bottom])
             .navigationTitle("Instafilter")
+            .confirmationDialog("Select a filter", isPresented: $showingFilters) {
+                // dialog here
+            }
         }
     }
     func changeFilter(){
-        
+        showingFilters = true
     }
     
     func loadImage() {
@@ -160,7 +165,10 @@ struct ContentView: View {
         }
     }
     func applyProcessing(){
-        currentFilter.scale = Float(filterIntensity)
+        // currentFilter.scale = Float(filterIntensity)
+        // Apply the filter intensity as the scale for the pixellate filter
+
+        currentFilter.setValue(filterIntensity * 100, forKey: kCIInputScaleKey)
         
         
         guard let outputImage = currentFilter.outputImage else { return }
