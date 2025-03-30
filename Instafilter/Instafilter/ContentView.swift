@@ -7,105 +7,22 @@
 import CoreImage
 import CoreImage.CIFilterBuiltins
 import PhotosUI
+import StoreKit
 import SwiftUI
 
-//struct ContentView: View {
-//    @State private var image: Image?
-//    
-//    var body: some View {
-//        VStack {
-//            image?
-//                .resizable()
-//                .scaledToFit()
-//        }
-//        .onAppear(perform: loadImage)
-//    }
-//    func loadImage() {
-//        let inputImage = UIImage(resource: .example)
-//        let beginImage = CIImage(image: inputImage)
-//        
-//        let context = CIContext()
-//        let currentFilter = CIFilter.pixellate()
-//        
-//        currentFilter.inputImage = beginImage
-//        let amount = 1.0
-//        let inputKeys = currentFilter.inputKeys
-//        
-//        if inputKeys.contains(kCIInputScaleKey) {
-//            currentFilter.setValue(amount, forKey: kCIInputScaleKey)
-//        }
-//        
-//        currentFilter.scale = 50
-//        
-//        guard let outputImage = currentFilter.outputImage else { return }
-//        guard let cgImage = context.createCGImage(outputImage, from: outputImage.extent)
-//                else { return }
-//        
-//        let uiImage = UIImage(cgImage: cgImage)
-//        image = Image(uiImage: uiImage)
-//        
-//        ContentUnavailableView{
-//            Label("No snippets", systemImage: "swift")
-//        } description: {
-//            Text("You don't have any saved snippets yet.")
-//        } actions: {
-//            Button("Create snippet") {
-//                
-//            }
-//            .buttonStyle(.borderedProminent)
-//        }
-//        
-//        
-//    }
-//}
-
-//struct ContentView: View {
-//    @State private var pickerItems = [PhotosPickerItem]()
-//    @State private var selectedImages = [Image]()
-//    
-//    var body: some View {
-//        ShareLink(item: URL(string: "https://www.google.com")!, subject: Text("Look at my pixel!"), message: Text("Check it out!"))
-//        Label("Spread the word that I code!", systemImage: "star")
-//        
-//        
-//        let example = Image(.example)
-//        
-//        ShareLink(item: example, preview: SharePreview("Me and Isa", image: example)) {
-//            Label("Click to share", systemImage: "star")
-//        }
-//        VStack {
-//            PhotosPicker(selection: $pickerItems, maxSelectionCount: 5, matching: .any(of: [.images, .not(.screenshots)])) {
-//                Label("Pick up to 5 Pictures", systemImage: "photo")
-//            }
-//            
-//            ScrollView{
-//                ForEach(0..<selectedImages.count, id: \.self) { i in
-//                    selectedImages[i]
-//                        .resizable()
-//                        .scaledToFit()
-//                }
-//            }
-//        }
-//        .onChange(of: pickerItems) {
-//            Task {
-//                selectedImages.removeAll()
-//                
-//                for item in pickerItems {
-//                    if let loadImage = try await item.loadTransferable(type: Image.self) {
-//                        selectedImages.append(loadImage)
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
 
 struct ContentView: View {
     @State private var processedImage: Image?
     @State private var filterIntensity = 0.5
     @State private var selectedItem: PhotosPickerItem?
     
-    @State private var currentFilter = CIFilter.pixellate()
+    @State private var imageSelected = false
+    
+    @AppStorage("filterCount") var filterCount = 0
+    @Environment(\.requestReview) var requestReview
+    
+    
+    @State private var currentFilter: CIFilter = CIFilter.sepiaTone()
     let context = CIContext()
     
     @State private var showingFilters = false
@@ -117,7 +34,7 @@ struct ContentView: View {
                 
                 PhotosPicker(selection: $selectedItem) {
                     if let processedImage {
-                        processedImage
+                            processedImage
                             .resizable()
                             .scaledToFit()
                     } else {
@@ -127,25 +44,35 @@ struct ContentView: View {
                 .onChange(of: selectedItem, loadImage)
                 
                 Spacer()
-                
-                HStack{
-                    Text("Intensity:")
-                    Slider(value: $filterIntensity)
-                        .onChange(of: filterIntensity, applyProcessing)
+                if imageSelected {
+                    HStack{
+                        Text("Intensity:")
+                        Slider(value: $filterIntensity)
+                            .onChange(of: filterIntensity, applyProcessing)
+                    }
+                    
+                    HStack {
+                        Button("Change Filer", action: changeFilter)
+                    }
+                    
                 }
-                
-                HStack {
-                    Button("Change Filer", action: changeFilter)
-                }
-                
                 Spacer()
                 
-                // share the picture
+                if let processedImage {
+                    ShareLink(item: processedImage, preview: SharePreview("Instafilter Image", image: processedImage))
+                }
             }
             .padding([.horizontal, .bottom])
             .navigationTitle("Instafilter")
             .confirmationDialog("Select a filter", isPresented: $showingFilters) {
-                // dialog here
+                Button("Crystalize") { setFilter(CIFilter.crystallize() )}
+                Button("Edges") { setFilter(CIFilter.edges() )}
+                Button("Guassian Blur") { setFilter(CIFilter.gaussianBlur() )}
+                Button("Pixellate") { setFilter(CIFilter.pixellate() )}
+                Button("Sepia Tone") { setFilter(CIFilter.sepiaTone() )}
+                Button("Unsharp Mask") { setFilter(CIFilter.unsharpMask())}
+                Button("Vignette") { setFilter(CIFilter.vignette() )}
+                Button("Cancel", role: .cancel) { }
             }
         }
     }
@@ -163,13 +90,19 @@ struct ContentView: View {
             currentFilter.setValue(beginImage, forKey: kCIInputImageKey)
             applyProcessing()
         }
+        imageSelected = true
     }
     func applyProcessing(){
-        // currentFilter.scale = Float(filterIntensity)
-        // Apply the filter intensity as the scale for the pixellate filter
-
-        currentFilter.setValue(filterIntensity * 100, forKey: kCIInputScaleKey)
         
+        let inputKeys = currentFilter.inputKeys
+        
+        if inputKeys.contains(kCIInputIntensityKey) {
+            currentFilter.setValue(filterIntensity, forKey: kCIInputIntensityKey) }
+        if inputKeys.contains(kCIInputRadiusKey) {
+            currentFilter.setValue(filterIntensity * 200, forKey: kCIInputRadiusKey) }
+        if inputKeys.contains(kCIInputScaleKey) {
+            currentFilter.setValue(filterIntensity * 150, forKey: kCIInputScaleKey) }
+    
         
         guard let outputImage = currentFilter.outputImage else { return }
         guard let cgImage = context.createCGImage(outputImage, from: outputImage.extent) else { return }
@@ -177,6 +110,17 @@ struct ContentView: View {
         let uiImage = UIImage(cgImage: cgImage)
         processedImage = Image(uiImage: uiImage)
         
+    }
+    
+    func setFilter(_ filter: CIFilter) {
+        currentFilter = filter
+        loadImage()
+        
+        filterCount += 1
+        
+        if filterCount >= 3 {
+            requestReview()
+        }
     }
 }
 
