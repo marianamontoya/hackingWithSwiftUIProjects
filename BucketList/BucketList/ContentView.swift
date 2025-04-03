@@ -122,8 +122,8 @@
 //                print(error.localizedDescription)
 //            }
 
-import LocalAuthentication
-import SwiftUI
+//import LocalAuthentication
+//import SwiftUI
 
 //struct ContentView: View {
 //    @State private var isUnlocked = false
@@ -159,6 +159,7 @@ import SwiftUI
 //    }
 //}
 import MapKit
+import SwiftUI
 
 struct ContentView: View {
     let startPosition = MapCameraPosition.region(
@@ -169,11 +170,23 @@ struct ContentView: View {
     )
     
     @State private var locations = [Location]()
+    @State private var selectedPlace: Location?
+    
     var body: some View {
-        MapReader {proxy in
+        MapReader { proxy in
             Map(initialPosition: startPosition) {
                 ForEach(locations) {location in
-                    Marker(location.name, coordinate: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude))
+                    Annotation(location.name, coordinate: location.coordinate) {
+                        Image(systemName: "star.circle")
+                            .resizable()
+                            .foregroundStyle(.red)
+                            .frame(width: 44, height: 44)
+                            .background(.white)
+                            .clipShape(.circle)
+                            .onLongPressGesture {
+                                selectedPlace = location
+                            }
+                    }
                 }
             }
             .onTapGesture { position in
@@ -182,10 +195,18 @@ struct ContentView: View {
                     locations.append(newLocation)
                 }
             }
+            .sheet(item: $selectedPlace) { place in
+                EditView(location: place) { newLocation in
+                        if let index = locations.firstIndex(of: place) {
+                            locations[index] = newLocation
+                    }
+                }
+            }
         }
     }
 }
 
 #Preview{
+    ContentView()
 }
 

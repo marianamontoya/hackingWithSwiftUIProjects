@@ -6,8 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		53DBA36F2D9EEBC100A463B0 /* EditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53DBA36E2D9EEBC100A463B0 /* EditView.swift */; };
+		53DBA3712D9EF3AD00A463B0 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53DBA3702D9EF3AD00A463B0 /* Result.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		53423CA82D98CCF800E13123 /* BucketList.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BucketList.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		53DBA36E2D9EEBC100A463B0 /* EditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditView.swift; sourceTree = "<group>"; };
+		53DBA3702D9EF3AD00A463B0 /* Result.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -32,6 +39,8 @@
 		53423C9F2D98CCF800E13123 = {
 			isa = PBXGroup;
 			children = (
+				53DBA36E2D9EEBC100A463B0 /* EditView.swift */,
+				53DBA3702D9EF3AD00A463B0 /* Result.swift */,
 				53423CAA2D98CCF800E13123 /* BucketList */,
 				53423CA92D98CCF800E13123 /* Products */,
 			);
@@ -119,6 +128,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				53DBA3712D9EF3AD00A463B0 /* Result.swift in Sources */,
+				53DBA36F2D9EEBC100A463B0 /* EditView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
