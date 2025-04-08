@@ -166,41 +166,57 @@ struct ContentView: View {
         center: CLLocationCoordinate2D(latitude: -23.008842745980573, longitude: -43.36903107689417), span: MKCoordinateSpan(latitudeDelta: 1, longitudeDelta: 1)
         )
     )
+    @State private var viewModel = ViewModel()
+    @State private var mapStyle: MapStyle = .standard
 
-    @State private var locations = [Location]()
-    @State private var selectedPlace: Location?
-    
     var body: some View {
-        MapReader { proxy in
-            Map(initialPosition: startPosition) {
-                ForEach(locations) { location in
-                    Annotation(location.name, coordinate: location.coordinate) {
-                        Image(systemName: "star.circle")
-                            .resizable()
-                            .foregroundStyle(.red)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle()) // Defines the tappable area
-                            .onTapGesture(count: 2) {
-                                print("Double tapped!")
-                                selectedPlace = location
-                            }
+        if viewModel.isUnlocked{
+            MapReader { proxy in
+                Map(initialPosition: startPosition) {
+                    ForEach(viewModel.locations) { location in
+                        Annotation(location.name, coordinate: location.coordinate) {
+                            Image(systemName: "star.circle")
+                                .resizable()
+                                .foregroundStyle(.red)
+                                .frame(width: 44, height: 44)
+                                .contentShape(Rectangle()) // Defines the tappable area
+                                .onTapGesture(count: 2) {
+                                    print("Double tapped!")
+                                    viewModel.selectedPlace = location
+                                }
+                        }
+                    }
+                }
+                .mapStyle(mapStyle)
+                .onTapGesture { position in
+                    if let coordinate = proxy.convert(position, from: .local) {
+                        viewModel.addLocation(at: coordinate)
+                    }
+                }
+                .sheet(item: $viewModel.selectedPlace) { place in
+                    EditView(location: place) {
+                        viewModel.update(location: $0)
+                        
                     }
                 }
             }
-            .onTapGesture { position in
-                if let coordinate = proxy.convert(position, from: .local) {
-                    let newLocation = Location(id: UUID(), name: "New Location", description: "", latitude: coordinate.latitude, longitude: coordinate.longitude)
-                    locations.append(newLocation)
-                }
+        } else {
+            Button("Unlocked Places", action: viewModel.authenticate)
+                .padding()
+                .background(.blue)
+                .foregroundStyle(.white)
+                .clipShape(.capsule)
+        }
+        HStack{
+            Button("Standard Map View"){
+                mapStyle = .standard
             }
-            .sheet(item: $selectedPlace) { place in
-                EditView(location: place) { newLocation in
-                    if let index = locations.firstIndex(of: place) {
-                        locations[index] = newLocation
-                    }
-                    
-                }
+            .padding()
+            Button("Hybrid Map View"){
+                mapStyle = .hybrid
             }
+            .padding()
+            
         }
     }
 }
