@@ -59,7 +59,9 @@ struct ContentView: View {
             
             Button("Increment") {
                 value += 1
+                print("Button tapped")
             }
+            .accessibilityInputLabels(["Button","Button tapped"])
             Button("Decrement") {
                 value -= 1
             }
