@@ -66,7 +66,7 @@ struct ContentView: View {
                 }
             }
             .padding([.horizontal, .bottom])
-            .navigationTitle("Pixel It"
+            .navigationTitle("Pixel It")
             .confirmationDialog("Select a filter", isPresented: $showingFilters) {
                 Button("Crystalize") { setFilter(CIFilter.crystallize() )}
                 Button("Edges") { setFilter(CIFilter.edges() )}
