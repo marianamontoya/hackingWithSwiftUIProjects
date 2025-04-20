@@ -4,6 +4,9 @@
 //
 //  Created by Mariana Montoya on 3/20/25.
 //
+// pixel by nakals from <a href="https://thenounproject.com/browse/icons/term/pixel/" target="_blank" title="pixel Icons">Noun Project</a> (CC BY 3.0)
+
+
 import CoreImage
 import CoreImage.CIFilterBuiltins
 import PhotosUI
@@ -22,7 +25,7 @@ struct ContentView: View {
     @Environment(\.requestReview) var requestReview
     
     
-    @State private var currentFilter: CIFilter = CIFilter.sepiaTone()
+    @State private var currentFilter: CIFilter = CIFilter.pixellate()
     let context = CIContext()
     
     @State private var showingFilters = false
@@ -63,7 +66,7 @@ struct ContentView: View {
                 }
             }
             .padding([.horizontal, .bottom])
-            .navigationTitle("Instafilter")
+            .navigationTitle("Pixel It"
             .confirmationDialog("Select a filter", isPresented: $showingFilters) {
                 Button("Crystalize") { setFilter(CIFilter.crystallize() )}
                 Button("Edges") { setFilter(CIFilter.edges() )}
@@ -74,6 +77,13 @@ struct ContentView: View {
                 Button("Vignette") { setFilter(CIFilter.vignette() )}
                 Button("Cancel", role: .cancel) { }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background {
+                Color.orange.ignoresSafeArea()
+            }
+            .toolbarBackground(.black)
+            
+            
         }
     }
     func changeFilter(){
@@ -101,7 +111,7 @@ struct ContentView: View {
         if inputKeys.contains(kCIInputRadiusKey) {
             currentFilter.setValue(filterIntensity * 200, forKey: kCIInputRadiusKey) }
         if inputKeys.contains(kCIInputScaleKey) {
-            currentFilter.setValue(filterIntensity * 150, forKey: kCIInputScaleKey) }
+            currentFilter.setValue(filterIntensity * 200, forKey: kCIInputScaleKey) }
     
         
         guard let outputImage = currentFilter.outputImage else { return }
